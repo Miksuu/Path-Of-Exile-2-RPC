@@ -157,14 +157,10 @@ def find_instance(
     return None
 
 
-def update_rpc(level_info, instance_info):
+def update_rpc(level_info, instance_info=None):
     rpc.update(
         details=f"{level_info['username']} ({level_info['base_class']} | {level_info['ascension_class']} - Lvl {level_info['level']})",
-        state=(
-            f"In: {instance_info['location_name']} (Lvl {instance_info['location_level']})"
-            if instance_info
-            else ""
-        ),
+        state=f"In game..." if not instance_info else f"In: {instance_info['location_name']} (Lvl {instance_info['location_level']})",
         start=int(datetime.datetime.now().timestamp()),
     )
 
