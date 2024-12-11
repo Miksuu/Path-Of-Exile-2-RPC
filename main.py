@@ -104,8 +104,12 @@ def load_locations():
 
 
 def determine_location(area_name: str, locations: Dict[str, str]) -> Optional[str]:
+    normalized_area_name = area_name
+    if area_name.startswith("C_"):
+        normalized_area_name = area_name[2:]
+
     for key, value in locations.items():
-        if area_name == key or area_name == value:
+        if normalized_area_name == key or normalized_area_name == value:
             return value
     return None
 
