@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import os
 import re
 import time
@@ -9,6 +10,10 @@ from typing import Dict, List, Optional
 
 import psutil
 from pypresence import Presence
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 
 class CharacterClass(Enum):
@@ -81,27 +86,45 @@ class ClassAscendency(Enum):
 
 def find_game_log():
     while True:
-        for process in psutil.process_iter():
-            try:
-                if process.name() == "PathOfExileSteam.exe":
-                    full_path = process.exe()
-                    game_dir = os.path.dirname(full_path)
-                    return os.path.join(game_dir, "logs", "Client.txt")
-            except (psutil.NoSuchProcess, psutil.AccessDenied):
-                continue
+        try:
+            for process in psutil.process_iter(["name", "exe"]):
+                if process.info.get("name") == "PathOfExileSteam.exe":
+                    full_path = process.info.get("exe")
+                    if full_path:
+                        game_dir = os.path.dirname(full_path)
+                        logging.info(f"Found game log at {game_dir}")
+                        return os.path.join(game_dir, "logs", "Client.txt")
+        except Exception as e:
+            logging.error(f"Error accessing processes: {e}")
         time.sleep(3)
 
 
 def load_locations():
     file_path = Path("locations.json")
-    if not file_path.exists():
-        return {}
-    with file_path.open("r", encoding="utf-8") as f:
+    url = "https://raw.githubusercontent.com/ezbooz/Path-Of-Exile-2-RPC/refs/heads/main/locations.json"
+
+    if file_path.exists():
         try:
-            data = json.load(f)
-            return data.get("areas", {})
-        except Exception:
+            with file_path.open("r", encoding="utf-8") as f:
+                data = json.load(f)
+                logging.info("Loaded locations from local cache.")
+                return data.get("areas", {})
+        except Exception as e:
+            logging.error(f"Error reading cached locations: {e}")
             return {}
+
+    try:
+        import urllib.request
+
+        with urllib.request.urlopen(url) as response:
+            data = json.load(response)
+        with file_path.open("w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        logging.info("Downloaded and cached locations.")
+        return data.get("areas", {})
+    except Exception as e:
+        logging.error(f"Failed to fetch locations from the server: {e}")
+        return {}
 
 
 def determine_location(area_name: str, locations: Dict[str, str]) -> Optional[str]:
@@ -162,28 +185,49 @@ def find_instance(
     return None
 
 
-def update_rpc(level_info, instance_info=None):
-    rpc.update(
-        details=f"{level_info['username']} ({level_info['base_class']} | {level_info['ascension_class']} - Lvl {level_info['level']})",
-        state=(
-            f"In game..."
-            if not instance_info
-            else f"In: {instance_info['location_name']} (Lvl {instance_info['location_level']})"
-        ),
-        start=int(datetime.datetime.now().timestamp()),
+def rpc_connect():
+    retries = 0
+    while retries < 5:
+        try:
+            rpc = Presence("1315800372207419504")
+            rpc.connect()
+            logging.info("Connected to Discord RPC.")
+            return rpc
+        except Exception as e:
+            retries += 1
+            logging.error(f"Retrying RPC connection, attempt {retries}...")
+            time.sleep(2**retries)
+            logging.warning(f"Error connecting to Discord RPC: {e}")
+    logging.error(
+        f"Failed to connect to Discord RPC after multiple retries.  Please ensure Discord is running and the application is authorized."
     )
+    return None
+
+
+def update_rpc(level_info, instance_info=None, status: str = "In game"):
+    if instance_info:
+        status = f"In: {instance_info['location_name']} (Lvl {instance_info['location_level']})"
+    else:
+        status = "In game..."
+
+    try:
+        rpc.update(
+            details=f"{level_info['username']} ({level_info['base_class']} | {level_info['ascension_class']} - Lvl {level_info['level']})",
+            state=status,
+            start=int(datetime.datetime.now().timestamp()),
+        )
+    except Exception as e:
+        logging.error(f"Failed to update RPC: {e}")
+
+
+regex_level = re.compile(r": (\w+) \(([\w\s]+)\) is now level (\d+)")
+regex_instance = re.compile(r'Generating level (\d+) area "([^"]+)" with seed (\d+)')
 
 
 def monitor_log():
     game_path = find_game_log()
-    if not game_path:
-        return
 
     log_file_path = Path(game_path)
-    regex_level = re.compile(r": (\w+) \(([\w\s]+)\) is now level (\d+)")
-    regex_instance = re.compile(
-        r'Generating level (\d+) area "([^"]+)" with seed (\d+)'
-    )
     locations = load_locations()
 
     last_level_info = get_last_level_up(log_file_path, regex_level)
@@ -222,6 +266,5 @@ def monitor_log():
 
 
 if __name__ == "__main__":
-    rpc = Presence("1315800372207419504")
-    rpc.connect()
+    rpc = rpc_connect()
     monitor_log()
