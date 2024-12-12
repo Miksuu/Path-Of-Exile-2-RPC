@@ -80,15 +80,16 @@ class ClassAscendency(Enum):
 
 
 def find_game_log():
-    for process in psutil.process_iter():
-        try:
-            if process.name() == "PathOfExileSteam.exe":
-                full_path = process.exe()
-                game_dir = os.path.dirname(full_path)
-                return os.path.join(game_dir, "logs", "Client.txt")
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            continue
-    return None
+    while True:
+        for process in psutil.process_iter():
+            try:
+                if process.name() == "PathOfExileSteam.exe":
+                    full_path = process.exe()
+                    game_dir = os.path.dirname(full_path)
+                    return os.path.join(game_dir, "logs", "Client.txt")
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                continue
+        time.sleep(3)
 
 
 def load_locations():
@@ -164,7 +165,11 @@ def find_instance(
 def update_rpc(level_info, instance_info=None):
     rpc.update(
         details=f"{level_info['username']} ({level_info['base_class']} | {level_info['ascension_class']} - Lvl {level_info['level']})",
-        state=f"In game..." if not instance_info else f"In: {instance_info['location_name']} (Lvl {instance_info['location_level']})",
+        state=(
+            f"In game..."
+            if not instance_info
+            else f"In: {instance_info['location_name']} (Lvl {instance_info['location_level']})"
+        ),
         start=int(datetime.datetime.now().timestamp()),
     )
 
