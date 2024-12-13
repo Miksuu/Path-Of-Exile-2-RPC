@@ -85,6 +85,7 @@ class ClassAscendency(Enum):
 
 
 def find_game_log():
+    logging.info('Waiting for the game start..')
     while True:
         try:
             for process in psutil.process_iter(["name", "exe"]):
