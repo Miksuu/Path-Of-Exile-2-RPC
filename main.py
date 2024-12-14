@@ -2,6 +2,7 @@ import datetime
 import json
 import logging
 import os
+import random
 import re
 import time
 from enum import Enum
@@ -85,7 +86,7 @@ class ClassAscendency(Enum):
 
 
 def find_game_log():
-    logging.info('Waiting for the game start..')
+    logging.info("Waiting for the game start..")
     while True:
         try:
             for process in psutil.process_iter(["name", "exe"]):
@@ -98,6 +99,21 @@ def find_game_log():
         except Exception as e:
             logging.error(f"Error accessing processes: {e}")
         time.sleep(3)
+
+def random_status():
+    statuses = [
+        "Exploring ancient ruins",
+        "Leveling up your skills",
+        "Defeating hordes of enemies",
+        "Looting rare artifacts",
+        "Crossing dark portals",
+        "Enhancing powerful gear",
+        "Learning forbidden magic",
+        "Tracking down the next boss",
+        "Joining the fight in the league",
+        "Preparing for the final encounter",
+    ]
+    return random.choice(statuses)
 
 
 def load_locations():
@@ -205,11 +221,12 @@ def rpc_connect():
     return None
 
 
-def update_rpc(level_info, instance_info=None, status: str = "In game"):
+def update_rpc(level_info, instance_info=None, status=None):
     if instance_info:
         status = f"In: {instance_info['location_name']} (Lvl {instance_info['location_level']})"
     else:
-        status = "In game..."
+        if status is None:
+            status = random_status()
 
     try:
         rpc.update(
@@ -219,6 +236,7 @@ def update_rpc(level_info, instance_info=None, status: str = "In game"):
         )
     except Exception as e:
         logging.error(f"Failed to update RPC: {e}")
+
 
 
 regex_level = re.compile(r": (\w+) \(([\w\s]+)\) is now level (\d+)")
@@ -235,7 +253,7 @@ def monitor_log():
     if last_level_info:
         rpc.update(
             details=f"{last_level_info['username']} ({last_level_info['base_class']} | {last_level_info['ascension_class']} - Lvl {last_level_info['level']})",
-            state="In game...",
+            state=random_status(),
             start=int(datetime.datetime.now().timestamp()),
         )
 
