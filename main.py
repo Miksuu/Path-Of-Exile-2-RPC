@@ -2,11 +2,11 @@ import datetime
 import json
 import logging
 import os
-import random
 import re
 import time
 from enum import Enum
 from pathlib import Path
+import random
 from typing import Dict, List, Optional
 
 import psutil
@@ -146,13 +146,21 @@ def load_locations():
 
 def determine_location(area_name: str, locations: Dict[str, str]) -> Optional[str]:
     normalized_area_name = area_name
-    if area_name.startswith("C_"):
-        normalized_area_name = area_name[2:]
 
-    for key, value in locations.items():
-        if normalized_area_name == key or normalized_area_name == value:
-            return value
-    return None
+    if area_name.startswith("Map"):
+        normalized_area_name = area_name[3:].split("_")[0]
+
+
+    if normalized_area_name in locations.values():
+        return normalized_area_name
+    else:
+        for key, value in locations.items():
+            if normalized_area_name == key or normalized_area_name == value:
+                return value
+
+    return normalized_area_name
+
+
 
 
 def find_last_level_up(line: str, regex_level: re.Pattern) -> Optional[Dict[str, str]]:
