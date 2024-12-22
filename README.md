@@ -7,5 +7,12 @@ Install guide:
 4. Ensure that Discord is running.
 
 
+## To-Do List
+- [ ] Add support for custom images for character classes and ascendencies in Discord RPC
+
+
 
 Thanks to [adainrivers](https://github.com/adainrivers/poe2-data) for providing the maps.
+
+
+
