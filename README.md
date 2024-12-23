@@ -14,8 +14,6 @@ Install guide:
 - [ ] Add support for the official client
 
 
-
-Thanks to [adainrivers](https://github.com/adainrivers/poe2-data) for providing the maps.
-
-
-
+## Acknowledgements
+- [adainrivers](https://github.com/adainrivers/poe2-data) — for providing the maps.  
+- [Miksuu](https://github.com/Miksuu) — for contributing to the code.  
