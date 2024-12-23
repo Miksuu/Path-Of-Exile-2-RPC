@@ -100,6 +100,7 @@ def find_game_log():
             logging.error(f"Error accessing processes: {e}")
         time.sleep(3)
 
+
 def random_status():
     statuses = [
         "Exploring ancient ruins",
@@ -150,7 +151,6 @@ def determine_location(area_name: str, locations: Dict[str, str]) -> Optional[st
     if area_name.startswith("Map"):
         normalized_area_name = area_name[3:].split("_")[0]
 
-
     if normalized_area_name in locations.values():
         return normalized_area_name
     else:
@@ -159,8 +159,6 @@ def determine_location(area_name: str, locations: Dict[str, str]) -> Optional[st
                 return value
 
     return normalized_area_name
-
-
 
 
 def find_last_level_up(line: str, regex_level: re.Pattern) -> Optional[Dict[str, str]]:
@@ -241,10 +239,10 @@ def update_rpc(level_info, instance_info=None, status=None):
             details=f"{level_info['username']} ({level_info['base_class']} | {level_info['ascension_class']} - Lvl {level_info['level']})",
             state=status,
             start=int(datetime.datetime.now().timestamp()),
+            small_image=level_info["ascension_class"].lower(),
         )
     except Exception as e:
         logging.error(f"Failed to update RPC: {e}")
-
 
 
 regex_level = re.compile(r": (\w+) \(([\w\s]+)\) is now level (\d+)")
@@ -263,6 +261,7 @@ def monitor_log():
             details=f"{last_level_info['username']} ({last_level_info['base_class']} | {last_level_info['ascension_class']} - Lvl {last_level_info['level']})",
             state=random_status(),
             start=int(datetime.datetime.now().timestamp()),
+            small_image=last_level_info["ascension_class"].lower(),
         )
 
     with log_file_path.open("r", encoding="utf-8") as log_file:
