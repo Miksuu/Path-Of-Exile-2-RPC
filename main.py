@@ -236,8 +236,13 @@ def update_rpc(level_info, instance_info=None, status=None):
             status = random_status()
 
     try:
+        details = (
+            f"{level_info['username']} ({level_info['base_class']}"
+            + (f" | {level_info['ascension_class']}" if level_info['ascension_class'] != "Unknown" else "")
+            + f" - Lvl {level_info['level']})"
+        )
         rpc.update(
-            details=f"{level_info['username']} ({level_info['base_class']} | {level_info['ascension_class']} - Lvl {level_info['level']})",
+            details=details,
             state=status,
             start=int(datetime.datetime.now().timestamp()),
             small_image=level_info["ascension_class"].lower(),
@@ -258,8 +263,13 @@ def monitor_log():
 
     last_level_info = get_last_level_up(log_file_path, regex_level)
     if last_level_info:
+        details = (
+            f"{last_level_info['username']} ({last_level_info['base_class']}"
+            + (f" | {last_level_info['ascension_class']}" if last_level_info['ascension_class'] != "Unknown" else "")
+            + f" - Lvl {last_level_info['level']})"
+        )
         rpc.update(
-            details=f"{last_level_info['username']} ({last_level_info['base_class']} | {last_level_info['ascension_class']} - Lvl {last_level_info['level']})",
+            details=details,
             state=random_status(),
             start=int(datetime.datetime.now().timestamp()),
             small_image=last_level_info["ascension_class"].lower(),
