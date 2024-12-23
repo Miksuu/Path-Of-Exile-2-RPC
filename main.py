@@ -163,15 +163,16 @@ def determine_location(area_name: str, locations: Dict[str, str]) -> Optional[st
 
 def find_last_level_up(line: str, regex_level: re.Pattern) -> Optional[Dict[str, str]]:
     if match := regex_level.search(line):
-        username, ascension_class, level = match.groups()
-        ascension_class = ascension_class.strip()
+        username, base_class, level = match.groups()
+        base_class = base_class.strip()
         try:
-            if ascension_class in ClassAscendency._value2member_map_:
-                base_class = ClassAscendency(ascension_class).get_class().value
+            if base_class in ClassAscendency._value2member_map_:
+                ascension_class = base_class
+                base_class = ClassAscendency(base_class).get_class().value
             else:
-                base_class = "Unknown"
+                ascension_class = "Unknown"
         except Exception:
-            base_class = "Unknown"
+            ascension_class = "Unknown"
         return {
             "username": username,
             "ascension_class": ascension_class,
