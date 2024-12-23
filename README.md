@@ -1,4 +1,5 @@
-![image](https://github.com/user-attachments/assets/5ef4f0d6-0f12-4c72-9030-9bf62e21ac15)
+![image](https://github.com/user-attachments/assets/eb0ec642-8cd0-4078-afcd-9759a30a2cd4)
+
 
 Install guide:
 1. Install Python 3.7 or higher.
@@ -7,5 +8,12 @@ Install guide:
 4. Ensure that Discord is running.
 
 
+## To-Do List
+- [ ] Add support for custom images for all character classes and ascendencies in Discord RPC
+
+
 
 Thanks to [adainrivers](https://github.com/adainrivers/poe2-data) for providing the maps.
+
+
+
