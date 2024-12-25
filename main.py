@@ -237,8 +237,8 @@ def update_rpc(level_info, instance_info=None, status=None):
 
     try:
         details = (
-            f"{level_info['username']} ({level_info['base_class']}"
-            + (f" | {level_info['ascension_class']}" if level_info['ascension_class'] != "Unknown" else "")
+            f"{level_info['username']} ("
+            + (f"{level_info['ascension_class']}" if level_info['ascension_class'] != "Unknown" else f"{level_info['base_class']}")
             + f" - Lvl {level_info['level']})"
         )
         rpc.update(
@@ -264,8 +264,8 @@ def monitor_log():
     last_level_info = get_last_level_up(log_file_path, regex_level)
     if last_level_info:
         details = (
-            f"{last_level_info['username']} ({last_level_info['base_class']}"
-            + (f" | {last_level_info['ascension_class']}" if last_level_info['ascension_class'] != "Unknown" else "")
+            f"{last_level_info['username']} ("
+            + (f"{last_level_info['ascension_class']}" if last_level_info['ascension_class'] != "Unknown" else f"{last_level_info['base_class']}")
             + f" - Lvl {last_level_info['level']})"
         )
         rpc.update(
