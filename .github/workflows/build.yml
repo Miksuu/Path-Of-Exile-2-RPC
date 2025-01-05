@@ -1,0 +1,65 @@
+name: Build Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-windows:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+          architecture: 'x64'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run PyInstaller with config file
+        run: python -m PyInstaller --onefile main.py
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v3
+        with:
+          name: Windows_qwiklabs
+          path: dist/main.exe
+
+      - name: Set Git user info
+        run: |
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+          git config --global user.name "${{ github.actor }}"
+
+      - name: Generate unique release tag
+        id: generate_tag
+        run: |
+          $SHORT_SHA = git rev-parse --short=7 HEAD
+          echo "RELEASE_TAG=v1.0.0-$SHORT_SHA" >> $env:GITHUB_ENV
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          release_name: Release ${{ env.RELEASE_TAG }}
+          body: Path Of Exile 2 Discord RPC
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/main.exe
+          asset_name: PathOfExile2DiscordRPC.exe
+          asset_content_type: application/octet-stream
