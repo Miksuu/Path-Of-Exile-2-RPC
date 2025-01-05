@@ -2,7 +2,7 @@
 
 
 Install guide:
-1. Install Python 3.7 or higher.
+1. Install Python 3.8 or higher.
 2. Install the required libraries using pip: `pip install -r requirements.txt`
 3. Run the script: `python main.py`
 4. Ensure that Discord is running.
