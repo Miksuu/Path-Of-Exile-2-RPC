@@ -9,7 +9,7 @@ Install guide:
 
 
 ## To-Do List
-- [ ] Add support for custom images for all character classes and ascendencies in Discord RPC
+- [x] Add support for custom images for all character classes and ascendencies in Discord RPC
 - [ ] Make it a service with auto-start when the game launches
 - [ ] Add support for the official client
 - [ ] Store and identify the player who started the script to avoid conflicts with party members
