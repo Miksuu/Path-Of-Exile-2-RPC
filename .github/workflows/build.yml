@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - main.py
 
 jobs:
   build-windows:
@@ -20,8 +22,11 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+        
+      - name: Install PyInstaller
+        run: pip install pyinstaller
 
-      - name: Run PyInstaller with config file
+      - name: Run PyInstaller
         run: python -m PyInstaller --onefile main.py
 
       - name: Upload Windows EXE
