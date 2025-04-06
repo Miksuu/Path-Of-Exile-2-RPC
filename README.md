@@ -7,6 +7,10 @@ Install guide:
 3. Run the script: `python main.py`
 4. Ensure that Discord is running.
 
+**For convenience, a pre-compiled .exe is available in the releases section.  
+Download the latest release here:**  
+👉 https://github.com/ezbooz/Path-Of-Exile-2-RPC/releases
+
 
 ## To-Do List
 - [x] Add support for custom images for all character classes and ascendencies in Discord RPC
