@@ -1,71 +1,98 @@
-name: Build Workflow
+name: Build and Release
 
 on:
   push:
     branches:
       - main
     paths:
-      - main.py
+      - 'main.py'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build-windows:
-    runs-on: windows-2019
+  build:
+    runs-on: windows-latest
+
+    outputs:
+      tag_name: ${{ steps.tag.outputs.tag }}
+      release_body: ${{ steps.notes.outputs.body }}
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10'
-          architecture: 'x64'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-        
-      - name: Install PyInstaller
-        run: pip install pyinstaller
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
 
-      - name: Run PyInstaller
-        run: python -m PyInstaller --onefile main.py
+    - name: Build executable
+      run: pyinstaller --onefile --name PathOfExile2DiscordRPC main.py
 
-      - name: Upload Windows EXE
-        uses: actions/upload-artifact@v3
-        with:
-          name: Windows_qwiklabs
-          path: dist/main.exe
+    - name: Archive executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: executable
+        path: dist/PathOfExile2DiscordRPC.exe
 
-      - name: Set Git user info
-        run: |
-          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
-          git config --global user.name "${{ github.actor }}"
+    - name: Generate release notes
+      id: notes
+      run: |
+        echo "body=$(git log -1 --pretty=format:'%h - %s')" >> $GITHUB_OUTPUT
 
-      - name: Generate unique release tag
-        id: generate_tag
-        run: |
-          $SHORT_SHA = git rev-parse --short=7 HEAD
-          echo "RELEASE_TAG=v1.0.0-$SHORT_SHA" >> $env:GITHUB_ENV
+    - name: Create and push tag
+      id: tag
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        $TAG = "v$(Get-Date -Format yyyyMMdd-HHmmss)"
+        echo "tag=$TAG" >> $env:GITHUB_OUTPUT
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        git remote set-url origin "https://x-access-token:$env:GITHUB_TOKEN@github.com/${{ github.repository }}.git"
+        git tag $TAG
+        git push origin $TAG
 
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        with:
-          tag_name: ${{ env.RELEASE_TAG }}
-          release_name: Release ${{ env.RELEASE_TAG }}
-          body: Path Of Exile 2 Discord RPC
-          draft: false
-          prerelease: false
+  release:
+    needs: build
+    runs-on: windows-latest
 
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/main.exe
-          asset_name: PathOfExile2DiscordRPC.exe
-          asset_content_type: application/octet-stream
+    steps:
+    - name: Download executable
+      uses: actions/download-artifact@v4
+      with:
+        name: executable
+        path: dist
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ needs.build.outputs.tag_name }}
+        release_name: Release ${{ needs.build.outputs.tag_name }}
+        body: ${{ needs.build.outputs.release_body }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/PathOfExile2DiscordRPC.exe
+        asset_name: PathOfExile2DiscordRPC.exe
+        asset_content_type: application/octet-stream
