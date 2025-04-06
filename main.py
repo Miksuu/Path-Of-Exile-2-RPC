@@ -24,6 +24,7 @@ class CharacterClass(Enum):
     SORCERESS = "Sorceress"
     WARRIOR = "Warrior"
     WITCH = "Witch"
+    HUNTRESS = "Huntress"
 
     def get_ascendencies(self) -> Optional[List["ClassAscendency"]]:
         return {
@@ -51,6 +52,10 @@ class CharacterClass(Enum):
                 ClassAscendency.BLOOD_MAGE,
                 ClassAscendency.INFERNALIST,
             ],
+            CharacterClass.HUNTRESS: [
+                ClassAscendency.RITUALIST,
+                ClassAscendency.AMAZON,
+            ],
         }.get(self)
 
 
@@ -67,6 +72,8 @@ class ClassAscendency(Enum):
     WARBRINGER = "Warbringer"
     BLOOD_MAGE = "Blood Mage"
     INFERNALIST = "Infernalist"
+    RITUALIST = "Ritualist"
+    AMAZON = "Amazon"
 
     def get_class(self) -> CharacterClass:
         return {
@@ -82,6 +89,8 @@ class ClassAscendency(Enum):
             ClassAscendency.WARBRINGER: CharacterClass.WARRIOR,
             ClassAscendency.BLOOD_MAGE: CharacterClass.WITCH,
             ClassAscendency.INFERNALIST: CharacterClass.WITCH,
+            ClassAscendency.RITUALIST: CharacterClass.HUNTRESS,
+            ClassAscendency.AMAZON: CharacterClass.HUNTRESS,
         }[self]
 
 
@@ -238,7 +247,11 @@ def update_rpc(level_info, instance_info=None, status=None):
     try:
         details = (
             f"{level_info['username']} ({level_info['base_class']}"
-            + (f" | {level_info['ascension_class']}" if level_info['ascension_class'] != "Unknown" else "")
+            + (
+                f" | {level_info['ascension_class']}"
+                if level_info["ascension_class"] != "Unknown"
+                else ""
+            )
             + f" - Lvl {level_info['level']})"
         )
         rpc.update(
@@ -265,7 +278,11 @@ def monitor_log():
     if last_level_info:
         details = (
             f"{last_level_info['username']} ({last_level_info['base_class']}"
-            + (f" | {last_level_info['ascension_class']}" if last_level_info['ascension_class'] != "Unknown" else "")
+            + (
+                f" | {last_level_info['ascension_class']}"
+                if last_level_info["ascension_class"] != "Unknown"
+                else ""
+            )
             + f" - Lvl {last_level_info['level']})"
         )
         rpc.update(
