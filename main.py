@@ -74,11 +74,15 @@ class ClassAscendency(Enum):
     INFERNALIST = "Infernalist"
     RITUALIST = "Ritualist"
     AMAZON = "Amazon"
+    SMITH_OF_KITAVA = "Smith of Kitava"
+    LICH = "Lich"
+    TACTICIAN = "Tactician"
 
     def get_class(self) -> CharacterClass:
         return {
             ClassAscendency.WITCHHUNTER: CharacterClass.MERCENARY,
             ClassAscendency.GEMLING_LEGIONNAIRE: CharacterClass.MERCENARY,
+            ClassAscendency.TACTICIAN: CharacterClass.MERCENARY,
             ClassAscendency.ACOLYTE_OF_CHAYULA: CharacterClass.MONK,
             ClassAscendency.INVOKER: CharacterClass.MONK,
             ClassAscendency.DEADEYE: CharacterClass.RANGER,
@@ -87,8 +91,10 @@ class ClassAscendency(Enum):
             ClassAscendency.STORMWEAVER: CharacterClass.SORCERESS,
             ClassAscendency.TITAN: CharacterClass.WARRIOR,
             ClassAscendency.WARBRINGER: CharacterClass.WARRIOR,
+            ClassAscendency.SMITH_OF_KITAVA: CharacterClass.WARRIOR,
             ClassAscendency.BLOOD_MAGE: CharacterClass.WITCH,
             ClassAscendency.INFERNALIST: CharacterClass.WITCH,
+            ClassAscendency.LICH: CharacterClass.WITCH,
             ClassAscendency.RITUALIST: CharacterClass.HUNTRESS,
             ClassAscendency.AMAZON: CharacterClass.HUNTRESS,
         }[self]
