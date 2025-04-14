@@ -264,7 +264,7 @@ def update_rpc(level_info, instance_info=None, status=None):
             details=details,
             state=status,
             start=int(datetime.datetime.now().timestamp()),
-            small_image=level_info["ascension_class"].lower(),
+            small_image=level_info["ascension_class"].lower().replace(" ", "_"),
         )
     except Exception as e:
         logging.error(f"Failed to update RPC: {e}")
