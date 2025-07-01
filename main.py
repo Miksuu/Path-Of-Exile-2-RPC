@@ -24,6 +24,7 @@ class CharacterClass(Enum):
     SORCERESS = "Sorceress"
     WARRIOR = "Warrior"
     WITCH = "Witch"
+    HUNTRESS = "Huntress"
 
     def get_ascendencies(self) -> Optional[List["ClassAscendency"]]:
         return {
@@ -51,6 +52,10 @@ class CharacterClass(Enum):
                 ClassAscendency.BLOOD_MAGE,
                 ClassAscendency.INFERNALIST,
             ],
+            CharacterClass.HUNTRESS: [
+                ClassAscendency.RITUALIST,
+                ClassAscendency.AMAZON,
+            ],
         }.get(self)
 
 
@@ -67,11 +72,17 @@ class ClassAscendency(Enum):
     WARBRINGER = "Warbringer"
     BLOOD_MAGE = "Blood Mage"
     INFERNALIST = "Infernalist"
+    RITUALIST = "Ritualist"
+    AMAZON = "Amazon"
+    SMITH_OF_KITAVA = "Smith of Kitava"
+    LICH = "Lich"
+    TACTICIAN = "Tactician"
 
     def get_class(self) -> CharacterClass:
         return {
             ClassAscendency.WITCHHUNTER: CharacterClass.MERCENARY,
             ClassAscendency.GEMLING_LEGIONNAIRE: CharacterClass.MERCENARY,
+            ClassAscendency.TACTICIAN: CharacterClass.MERCENARY,
             ClassAscendency.ACOLYTE_OF_CHAYULA: CharacterClass.MONK,
             ClassAscendency.INVOKER: CharacterClass.MONK,
             ClassAscendency.DEADEYE: CharacterClass.RANGER,
@@ -80,8 +91,12 @@ class ClassAscendency(Enum):
             ClassAscendency.STORMWEAVER: CharacterClass.SORCERESS,
             ClassAscendency.TITAN: CharacterClass.WARRIOR,
             ClassAscendency.WARBRINGER: CharacterClass.WARRIOR,
+            ClassAscendency.SMITH_OF_KITAVA: CharacterClass.WARRIOR,
             ClassAscendency.BLOOD_MAGE: CharacterClass.WITCH,
             ClassAscendency.INFERNALIST: CharacterClass.WITCH,
+            ClassAscendency.LICH: CharacterClass.WITCH,
+            ClassAscendency.RITUALIST: CharacterClass.HUNTRESS,
+            ClassAscendency.AMAZON: CharacterClass.HUNTRESS,
         }[self]
 
 
@@ -238,14 +253,18 @@ def update_rpc(level_info, instance_info=None, status=None):
     try:
         details = (
             f"{level_info['username']} ({level_info['base_class']}"
-            + (f" | {level_info['ascension_class']}" if level_info['ascension_class'] != "Unknown" else "")
+            + (
+                f" | {level_info['ascension_class']}"
+                if level_info["ascension_class"] != "Unknown"
+                else ""
+            )
             + f" - Lvl {level_info['level']})"
         )
         rpc.update(
             details=details,
             state=status,
             start=int(datetime.datetime.now().timestamp()),
-            small_image=level_info["ascension_class"].lower(),
+            small_image=level_info["ascension_class"].lower().replace(" ", "_"),
         )
     except Exception as e:
         logging.error(f"Failed to update RPC: {e}")
@@ -265,7 +284,11 @@ def monitor_log():
     if last_level_info:
         details = (
             f"{last_level_info['username']} ({last_level_info['base_class']}"
-            + (f" | {last_level_info['ascension_class']}" if last_level_info['ascension_class'] != "Unknown" else "")
+            + (
+                f" | {last_level_info['ascension_class']}"
+                if last_level_info["ascension_class"] != "Unknown"
+                else ""
+            )
             + f" - Lvl {last_level_info['level']})"
         )
         rpc.update(
